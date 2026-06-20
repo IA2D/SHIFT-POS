@@ -1,0 +1,16 @@
+{
+  "environment": "development",
+  "api": {
+    "enabled": false,
+    "baseUrl": "http://127.0.0.1:8080",
+    "timeoutSeconds": 20
+  },
+  "database": {
+    "enabled": false,
+    "driver": "sqlite",
+    "name": "shift_pos.sqlite"
+  },
+  "network": {
+    "defaultMasterPort": 47831
+  }
+}

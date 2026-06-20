@@ -1,0 +1,114 @@
+# SHIFT POS
+
+Clean cross-platform rewrite of SHIFT POS for Windows and Android.
+
+The app is designed to run in three modes:
+
+- Standalone: local device owns its SQLite database.
+- Master: local device owns SQLite and exposes a LAN API.
+- Side: device connects to a master and does not create a POS database.
+
+Firebase is intentionally excluded. Future online sync must go through a backend API. The backend can use PostgreSQL, MySQL, SQL Server, or another database behind its own service layer without changing the app.
+
+## Current Rewrite Status
+
+This repository is at the foundation stage.
+
+Implemented now:
+
+- Flutter project skeleton.
+- Clean feature/core/shared folder structure.
+- Runtime config file.
+- Database linkage disabled by config.
+- API endpoint configurable by config.
+- Platform/database/sync interfaces prepared.
+- Minimal RTL app shell for POS, Manager, and Settings.
+
+Not implemented yet:
+
+- SQLite connection.
+- Backend API calls.
+- Printing.
+- Full POS workflows.
+- Master/side LAN server.
+
+## Configuration
+
+Runtime config lives in:
+
+```text
+assets/config/app_config.json
+```
+
+Initial config:
+
+```json
+{
+  "environment": "development",
+  "api": {
+    "enabled": false,
+    "baseUrl": "http://127.0.0.1:8080",
+    "timeoutSeconds": 20
+  },
+  "database": {
+    "enabled": false,
+    "driver": "sqlite",
+    "name": "shift_pos.sqlite"
+  },
+  "network": {
+    "defaultMasterPort": 47831
+  }
+}
+```
+
+For the first versions, `database.enabled` should remain `false`. This lets the app shell and domain structure grow without hiding accidental database coupling inside UI code.
+
+## Architecture
+
+```text
+lib/
+  app/
+    App widget, routing, shell composition
+  core/
+    config, database, networking, platform service contracts
+  features/
+    auth, pos, manager, settings
+  shared/
+    theme, widgets, value objects
+```
+
+Rules:
+
+- UI screens must not talk directly to SQLite, files, printers, or HTTP.
+- Features depend on interfaces, not platform implementations.
+- Business logic belongs in domain/application services, not widgets.
+- Sync uses business entities/events, not raw table mirroring.
+- Platform-specific code goes behind adapters.
+
+## First Milestones
+
+1. Build the local domain model.
+2. Add local repositories behind interfaces.
+3. Add SQLite only after schemas and migrations are reviewed.
+4. Rebuild authentication and permissions.
+5. Rebuild POS order flow.
+6. Add receipt document model.
+7. Add master/side LAN API.
+8. Add backend sync API client.
+
+## Development
+
+Flutter is required to build this project.
+
+```powershell
+flutter pub get
+flutter run -d windows
+flutter run -d android
+```
+
+The current machine used to create this skeleton did not have Flutter/Dart installed, so the first validation step after installing Flutter is:
+
+```powershell
+flutter analyze
+flutter test
+```
