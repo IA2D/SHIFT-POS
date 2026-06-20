@@ -16,12 +16,15 @@ This repository is at the foundation stage.
 
 Implemented now:
 
-- Flutter project skeleton.
+- Real Flutter project with Android and Windows platform folders.
 - Clean feature/core/shared folder structure.
 - Runtime config file.
 - Database linkage disabled by config.
 - API endpoint configurable by config.
 - Platform/database/sync interfaces prepared.
+- Tested order pricing service.
+- Tested inventory transaction balance service.
+- Tested supplier debt balance service.
 - Minimal RTL app shell for POS, Manager, and Settings.
 
 Not implemented yet:
@@ -95,6 +98,12 @@ Rules:
 6. Add receipt document model.
 7. Add master/side LAN API.
 8. Add backend sync API client.
+
+See the full implementation roadmap in:
+
+```text
+docs/rewrite-roadmap.md
+```
 
 ## Development
 

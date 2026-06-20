@@ -3,7 +3,7 @@ import 'database_gateway.dart';
 class DisabledDatabaseGateway implements DatabaseGateway {
   const DisabledDatabaseGateway();
 
-  Never _disabled(): Never {
+  Never _disabled() {
     throw StateError(
       'Database linkage is disabled by config. Enable database.enabled after '
       'schema and migrations are implemented.',

@@ -13,20 +13,20 @@ class ManagerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
+    return const Padding(
+      padding: EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const PageHeader(
+          PageHeader(
             title: 'لوحة المدير',
             subtitle: 'إدارة الأصناف والمخزون والمستخدمين ستبنى كوحدات منفصلة.',
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: const [
+            children: [
               _ManagerCard(title: 'الأصناف', icon: Icons.restaurant_menu),
               _ManagerCard(title: 'المخزون', icon: Icons.inventory_2),
               _ManagerCard(title: 'الموردين', icon: Icons.local_shipping),
