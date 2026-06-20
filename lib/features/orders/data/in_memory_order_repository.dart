@@ -17,6 +17,14 @@ class InMemoryOrderRepository implements OrderRepository {
   }
 
   @override
+  Future<Order?> getById(String id) async {
+    for (final order in _orders) {
+      if (order.id == id) return order;
+    }
+    return null;
+  }
+
+  @override
   Future<List<Order>> listOrders() async {
     final orders = [..._orders];
     orders.sort((a, b) => b.createdAt.compareTo(a.createdAt));

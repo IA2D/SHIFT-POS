@@ -36,6 +36,8 @@ Implemented now:
   - cash/card selection for paid orders
   - order totals preview
   - in-memory order saving
+  - unpaid dine-in order list
+  - dine-in checkout by cash or card
 - Manager dashboard reads live in-memory orders and shows:
   - total orders
   - paid orders

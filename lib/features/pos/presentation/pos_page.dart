@@ -5,8 +5,10 @@ import '../../../core/config/app_config.dart';
 import '../../../shared/domain/money.dart';
 import '../../menu/domain/menu_category.dart';
 import '../../menu/domain/menu_item.dart';
+import '../../orders/application/order_payment_service.dart';
 import '../../orders/domain/order.dart';
 import '../../orders/domain/order_enums.dart';
+import '../../orders/domain/order_repository.dart';
 import '../../pos/application/cart_line.dart';
 import '../../pos/application/pos_order_service.dart';
 import '../../settings/domain/pos_settings.dart';
@@ -153,6 +155,34 @@ class _PosPageState extends State<PosPage> {
     }
   }
 
+  Future<void> _openUnpaidDineInDialog() async {
+    final dependencies = AppStateScope.of(context);
+    final currencySymbol = _settings?.currencySymbol ?? 'ج.م';
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return _UnpaidDineInDialog(
+          orderRepository: dependencies.orderRepository,
+          currencySymbol: currencySymbol,
+          onPaid: (order, method) async {
+            final service = OrderPaymentService(
+              orderRepository: dependencies.orderRepository,
+            );
+            final paid = await service.markPaid(
+              orderId: order.id,
+              method: method,
+            );
+            if (!mounted) return;
+            setState(() {
+              _message = 'تم تحصيل طلب الصالة #${paid.orderNumber}';
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -170,6 +200,7 @@ class _PosPageState extends State<PosPage> {
       tables: _tables,
       noteController: _noteController,
       message: _message,
+      onOpenUnpaidDineIn: _openUnpaidDineInDialog,
       onOrderTypeChanged: (value) {
         setState(() => _orderType = value);
       },
@@ -199,11 +230,11 @@ class _PosPageState extends State<PosPage> {
         return Padding(
           padding: const EdgeInsets.all(16),
           child: compact
-              ? Column(
+              ? ListView(
                   children: [
-                    SizedBox(height: 420, child: cartPanel),
+                    SizedBox(height: 450, child: cartPanel),
                     const SizedBox(height: 16),
-                    Expanded(child: menuPanel),
+                    SizedBox(height: 420, child: menuPanel),
                   ],
                 )
               : Row(
@@ -300,6 +331,7 @@ class _CartPanel extends StatelessWidget {
     required this.tables,
     required this.noteController,
     required this.message,
+    required this.onOpenUnpaidDineIn,
     required this.onOrderTypeChanged,
     required this.onPaymentMethodChanged,
     required this.onTableChanged,
@@ -317,6 +349,7 @@ class _CartPanel extends StatelessWidget {
   final List<DiningTable> tables;
   final TextEditingController noteController;
   final String? message;
+  final VoidCallback onOpenUnpaidDineIn;
   final ValueChanged<OrderType> onOrderTypeChanged;
   final ValueChanged<PaymentMethod> onPaymentMethodChanged;
   final ValueChanged<DiningTable?> onTableChanged;
@@ -337,6 +370,12 @@ class _CartPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('الطلب', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: onOpenUnpaidDineIn,
+              icon: const Icon(Icons.table_restaurant),
+              label: const Text('طلبات الصالة المفتوحة'),
+            ),
             const SizedBox(height: 12),
             SegmentedButton<OrderType>(
               segments: const [
@@ -437,6 +476,112 @@ class _CartPanel extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _UnpaidDineInDialog extends StatefulWidget {
+  const _UnpaidDineInDialog({
+    required this.orderRepository,
+    required this.currencySymbol,
+    required this.onPaid,
+  });
+
+  final OrderRepository orderRepository;
+  final String currencySymbol;
+  final Future<void> Function(Order order, PaymentMethod method) onPaid;
+
+  @override
+  State<_UnpaidDineInDialog> createState() => _UnpaidDineInDialogState();
+}
+
+class _UnpaidDineInDialogState extends State<_UnpaidDineInDialog> {
+  late Future<List<Order>> _ordersFuture;
+  bool _paying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  void _reload() {
+    _ordersFuture = widget.orderRepository.listUnpaidDineInOrders();
+  }
+
+  Future<void> _markPaid(Order order, PaymentMethod method) async {
+    setState(() => _paying = true);
+    try {
+      await widget.onPaid(order, method);
+      if (!mounted) return;
+      setState(_reload);
+    } finally {
+      if (mounted) setState(() => _paying = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('طلبات الصالة المفتوحة'),
+      content: SizedBox(
+        width: 620,
+        child: FutureBuilder<List<Order>>(
+          future: _ordersFuture,
+          builder: (context, snapshot) {
+            final orders = snapshot.data;
+            if (orders == null) {
+              return const SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (orders.isEmpty) {
+              return const SizedBox(
+                height: 120,
+                child: Center(child: Text('لا توجد طلبات صالة مفتوحة.')),
+              );
+            }
+
+            return ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 420),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: orders.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final order = orders[index];
+                  return ListTile(
+                    title: Text('#${order.orderNumber} - ${order.tableNameAr ?? 'صالة'}'),
+                    subtitle: Text(
+                      '${order.lines.length} صنف - ${order.totals.total.toStringAsFixed(2)} ${widget.currencySymbol}',
+                    ),
+                    trailing: Wrap(
+                      spacing: 8,
+                      children: [
+                        OutlinedButton(
+                          onPressed: _paying ? null : () => _markPaid(order, PaymentMethod.card),
+                          child: const Text('بطاقة'),
+                        ),
+                        FilledButton(
+                          onPressed: _paying ? null : () => _markPaid(order, PaymentMethod.cash),
+                          child: const Text('نقدي'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('إغلاق'),
+        ),
+      ],
     );
   }
 }
