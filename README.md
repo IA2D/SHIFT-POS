@@ -22,6 +22,8 @@ Implemented now:
 - Database linkage disabled by config.
 - API endpoint configurable by config.
 - Platform/database/sync interfaces prepared.
+- In-memory auth/session flow with no prefilled login credentials.
+- Permission-aware shell navigation.
 - Tested order pricing service.
 - Tested inventory transaction balance service.
 - Tested supplier debt balance service.
@@ -136,3 +138,4 @@ Current verification:
 - `flutter test` passes.
 - `flutter build windows` passes.
 - Android release APK was built at `build/app/outputs/flutter-apk/app-release.apk`.
+- Windows release executable was built at `build/windows/x64/runner/Release/shift_pos.exe`.

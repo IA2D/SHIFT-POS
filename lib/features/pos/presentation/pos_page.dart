@@ -157,49 +157,60 @@ class _PosPageState extends State<PosPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 380,
-            child: _CartPanel(
-              cart: _cart,
-              subtotal: _subtotal,
-              total: _previewTotal,
-              orderType: _orderType,
-              paymentMethod: _paymentMethod,
-              selectedTable: _selectedTable,
-              tables: _tables,
-              noteController: _noteController,
-              message: _message,
-              onOrderTypeChanged: (value) {
-                setState(() => _orderType = value);
-              },
-              onPaymentMethodChanged: (value) {
-                setState(() => _paymentMethod = value);
-              },
-              onTableChanged: (value) {
-                setState(() => _selectedTable = value);
-              },
-              onQuantityChanged: _changeQuantity,
-              onSubmit: _submitOrder,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _MenuPanel(
-              categories: _categories,
-              selectedCategoryId: _selectedCategoryId,
-              items: _visibleItems,
-              onCategoryChanged: (id) {
-                setState(() => _selectedCategoryId = id);
-              },
-              onItemPressed: _addItem,
-            ),
-          ),
-        ],
-      ),
+    final cartPanel = _CartPanel(
+      cart: _cart,
+      subtotal: _subtotal,
+      total: _previewTotal,
+      orderType: _orderType,
+      paymentMethod: _paymentMethod,
+      selectedTable: _selectedTable,
+      tables: _tables,
+      noteController: _noteController,
+      message: _message,
+      onOrderTypeChanged: (value) {
+        setState(() => _orderType = value);
+      },
+      onPaymentMethodChanged: (value) {
+        setState(() => _paymentMethod = value);
+      },
+      onTableChanged: (value) {
+        setState(() => _selectedTable = value);
+      },
+      onQuantityChanged: _changeQuantity,
+      onSubmit: _submitOrder,
+    );
+    final menuPanel = _MenuPanel(
+      categories: _categories,
+      selectedCategoryId: _selectedCategoryId,
+      items: _visibleItems,
+      onCategoryChanged: (id) {
+        setState(() => _selectedCategoryId = id);
+      },
+      onItemPressed: _addItem,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 900;
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: compact
+              ? Column(
+                  children: [
+                    SizedBox(height: 420, child: cartPanel),
+                    const SizedBox(height: 16),
+                    Expanded(child: menuPanel),
+                  ],
+                )
+              : Row(
+                  children: [
+                    SizedBox(width: 380, child: cartPanel),
+                    const SizedBox(width: 16),
+                    Expanded(child: menuPanel),
+                  ],
+                ),
+        );
+      },
     );
   }
 }

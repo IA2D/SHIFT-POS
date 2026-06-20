@@ -1,3 +1,5 @@
+import '../features/auth/data/in_memory_auth_repository.dart';
+import '../features/auth/domain/auth_repository.dart';
 import '../features/menu/data/in_memory_menu_repository.dart';
 import '../features/menu/domain/menu_repository.dart';
 import '../features/orders/data/in_memory_order_repository.dart';
@@ -10,11 +12,14 @@ class AppDependencies {
     MenuRepository? menuRepository,
     TableRepository? tableRepository,
     OrderRepository? orderRepository,
+    AuthRepository? authRepository,
   })  : menuRepository = menuRepository ?? InMemoryMenuRepository.seeded(),
         tableRepository = tableRepository ?? InMemoryTableRepository.seeded(),
-        orderRepository = orderRepository ?? InMemoryOrderRepository();
+        orderRepository = orderRepository ?? InMemoryOrderRepository(),
+        authRepository = authRepository ?? InMemoryAuthRepository();
 
   final MenuRepository menuRepository;
   final TableRepository tableRepository;
   final OrderRepository orderRepository;
+  final AuthRepository authRepository;
 }
