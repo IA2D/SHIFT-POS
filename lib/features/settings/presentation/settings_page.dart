@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_state_scope.dart';
 import '../../../core/config/app_config.dart';
 import '../../../shared/widgets/page_header.dart';
+import '../domain/pos_settings.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({
@@ -13,6 +15,8 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsFuture = AppStateScope.of(context).settingsRepository.getPosSettings();
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: ListView(
@@ -37,6 +41,26 @@ class SettingsPage extends StatelessWidget {
           _SettingRow(
             label: 'منفذ الماستر الافتراضي',
             value: config.network.defaultMasterPort.toString(),
+          ),
+          const SizedBox(height: 12),
+          FutureBuilder<PosSettings>(
+            future: settingsFuture,
+            builder: (context, snapshot) {
+              final settings = snapshot.data;
+              if (settings == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return Column(
+                children: [
+                  _SettingRow(label: 'اسم المطعم', value: settings.restaurantNameAr),
+                  _SettingRow(label: 'العملة', value: settings.currencySymbol),
+                  _SettingRow(label: 'الضريبة', value: '${settings.taxRate.toStringAsFixed(2)}%'),
+                  _SettingRow(label: 'الخدمة', value: '${settings.serviceRate.toStringAsFixed(2)}%'),
+                  _SettingRow(label: 'رسوم الدليفري', value: settings.deliveryFee.toStringAsFixed(2)),
+                ],
+              );
+            },
           ),
         ],
       ),

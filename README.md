@@ -24,6 +24,7 @@ Implemented now:
 - Platform/database/sync interfaces prepared.
 - In-memory auth/session flow with no prefilled login credentials.
 - Permission-aware shell navigation.
+- In-memory POS settings repository for restaurant name, currency, tax, service, and delivery fee.
 - Tested order pricing service.
 - Tested inventory transaction balance service.
 - Tested supplier debt balance service.
@@ -35,6 +36,12 @@ Implemented now:
   - cash/card selection for paid orders
   - order totals preview
   - in-memory order saving
+- Manager dashboard reads live in-memory orders and shows:
+  - total orders
+  - paid orders
+  - unpaid dine-in orders
+  - paid sales total
+  - recent orders
 - Minimal RTL app shell for POS, Manager, and Settings.
 
 Not implemented yet:

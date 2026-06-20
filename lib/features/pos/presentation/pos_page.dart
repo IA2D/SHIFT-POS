@@ -9,6 +9,7 @@ import '../../orders/domain/order.dart';
 import '../../orders/domain/order_enums.dart';
 import '../../pos/application/cart_line.dart';
 import '../../pos/application/pos_order_service.dart';
+import '../../settings/domain/pos_settings.dart';
 import '../../tables/domain/dining_table.dart';
 
 class PosPage extends StatefulWidget {
@@ -24,15 +25,12 @@ class PosPage extends StatefulWidget {
 }
 
 class _PosPageState extends State<PosPage> {
-  static const _taxRate = 14.0;
-  static const _serviceRate = 0.0;
-  static const _deliveryFee = 25.0;
-
   final List<CartLine> _cart = [];
   final TextEditingController _noteController = TextEditingController();
   List<MenuCategory> _categories = [];
   List<MenuItem> _items = [];
   List<DiningTable> _tables = [];
+  PosSettings? _settings;
   String? _selectedCategoryId;
   OrderType _orderType = OrderType.takeaway;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
@@ -57,11 +55,13 @@ class _PosPageState extends State<PosPage> {
     final categories = await dependencies.menuRepository.listCategories();
     final items = await dependencies.menuRepository.listItems();
     final tables = await dependencies.tableRepository.listTables();
+    final settings = await dependencies.settingsRepository.getPosSettings();
     if (!mounted) return;
     setState(() {
       _categories = categories;
       _items = items;
       _tables = tables;
+      _settings = settings;
       _selectedCategoryId = categories.isEmpty ? null : categories.first.id;
       _selectedTable = tables.isEmpty ? null : tables.first;
       _loading = false;
@@ -81,10 +81,12 @@ class _PosPageState extends State<PosPage> {
   }
 
   double get _previewTotal {
-    final delivery = _orderType == OrderType.delivery ? _deliveryFee : 0.0;
+    final settings = _settings;
+    if (settings == null) return 0;
+    final delivery = _orderType == OrderType.delivery ? settings.deliveryFee : 0.0;
     final taxableBase = _subtotal;
-    final tax = Money.round(taxableBase * (_taxRate / 100));
-    final service = Money.round(taxableBase * (_serviceRate / 100));
+    final tax = Money.round(taxableBase * (settings.taxRate / 100));
+    final service = Money.round(taxableBase * (settings.serviceRate / 100));
     return Money.round(taxableBase + tax + service + delivery);
   }
 
@@ -131,9 +133,9 @@ class _PosPageState extends State<PosPage> {
       final order = await service.createOrder(
         cart: _cart,
         type: _orderType,
-        taxRate: _taxRate,
-        serviceRate: _serviceRate,
-        deliveryFee: _deliveryFee,
+        taxRate: _settings?.taxRate ?? 0,
+        serviceRate: _settings?.serviceRate ?? 0,
+        deliveryFee: _settings?.deliveryFee ?? 0,
         table: _orderType == OrderType.dineIn ? _selectedTable : null,
         paymentMethod: _orderType == OrderType.dineIn ? null : _paymentMethod,
         noteAr: _noteController.text,
@@ -161,6 +163,7 @@ class _PosPageState extends State<PosPage> {
       cart: _cart,
       subtotal: _subtotal,
       total: _previewTotal,
+      currencySymbol: _settings?.currencySymbol ?? 'ج.م',
       orderType: _orderType,
       paymentMethod: _paymentMethod,
       selectedTable: _selectedTable,
@@ -183,6 +186,7 @@ class _PosPageState extends State<PosPage> {
       categories: _categories,
       selectedCategoryId: _selectedCategoryId,
       items: _visibleItems,
+      currencySymbol: _settings?.currencySymbol ?? 'ج.م',
       onCategoryChanged: (id) {
         setState(() => _selectedCategoryId = id);
       },
@@ -220,6 +224,7 @@ class _MenuPanel extends StatelessWidget {
     required this.categories,
     required this.selectedCategoryId,
     required this.items,
+    required this.currencySymbol,
     required this.onCategoryChanged,
     required this.onItemPressed,
   });
@@ -227,6 +232,7 @@ class _MenuPanel extends StatelessWidget {
   final List<MenuCategory> categories;
   final String? selectedCategoryId;
   final List<MenuItem> items;
+  final String currencySymbol;
   final ValueChanged<String> onCategoryChanged;
   final ValueChanged<MenuItem> onItemPressed;
 
@@ -270,7 +276,7 @@ class _MenuPanel extends StatelessWidget {
                   children: [
                     Text(item.nameAr, textAlign: TextAlign.center),
                     const SizedBox(height: 8),
-                    Text('${item.price.toStringAsFixed(2)} ج.م'),
+                    Text('${item.price.toStringAsFixed(2)} $currencySymbol'),
                   ],
                 ),
               );
@@ -287,6 +293,7 @@ class _CartPanel extends StatelessWidget {
     required this.cart,
     required this.subtotal,
     required this.total,
+    required this.currencySymbol,
     required this.orderType,
     required this.paymentMethod,
     required this.selectedTable,
@@ -303,6 +310,7 @@ class _CartPanel extends StatelessWidget {
   final List<CartLine> cart;
   final double subtotal;
   final double total;
+  final String currencySymbol;
   final OrderType orderType;
   final PaymentMethod paymentMethod;
   final DiningTable? selectedTable;
@@ -378,7 +386,7 @@ class _CartPanel extends StatelessWidget {
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: Text(line.nameAr),
-                          subtitle: Text('${line.unitPrice.toStringAsFixed(2)} ج.م'),
+                          subtitle: Text('${line.unitPrice.toStringAsFixed(2)} $currencySymbol'),
                           trailing: Wrap(
                             spacing: 4,
                             crossAxisAlignment: WrapCrossAlignment.center,
@@ -405,8 +413,17 @@ class _CartPanel extends StatelessWidget {
               maxLines: 2,
             ),
             const SizedBox(height: 12),
-            _TotalRow(label: 'الإجمالي قبل الضريبة', value: subtotal),
-            _TotalRow(label: 'الإجمالي المتوقع', value: total, strong: true),
+            _TotalRow(
+              label: 'الإجمالي قبل الضريبة',
+              value: subtotal,
+              currencySymbol: currencySymbol,
+            ),
+            _TotalRow(
+              label: 'الإجمالي المتوقع',
+              value: total,
+              currencySymbol: currencySymbol,
+              strong: true,
+            ),
             if (message != null) ...[
               const SizedBox(height: 8),
               Text(message!, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
@@ -428,11 +445,13 @@ class _TotalRow extends StatelessWidget {
   const _TotalRow({
     required this.label,
     required this.value,
+    required this.currencySymbol,
     this.strong = false,
   });
 
   final String label;
   final double value;
+  final String currencySymbol;
   final bool strong;
 
   @override
@@ -446,7 +465,7 @@ class _TotalRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(label, style: style)),
-          Text('${value.toStringAsFixed(2)} ج.م', style: style),
+          Text('${value.toStringAsFixed(2)} $currencySymbol', style: style),
         ],
       ),
     );
