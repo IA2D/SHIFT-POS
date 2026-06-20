@@ -25,6 +25,14 @@ Implemented now:
 - Tested order pricing service.
 - Tested inventory transaction balance service.
 - Tested supplier debt balance service.
+- Usable in-memory POS MVP:
+  - seeded menu
+  - cart
+  - takeaway/dine-in/delivery modes
+  - table selection for dine-in
+  - cash/card selection for paid orders
+  - order totals preview
+  - in-memory order saving
 - Minimal RTL app shell for POS, Manager, and Settings.
 
 Not implemented yet:
@@ -32,7 +40,7 @@ Not implemented yet:
 - SQLite connection.
 - Backend API calls.
 - Printing.
-- Full POS workflows.
+- Full production POS workflows.
 - Master/side LAN server.
 
 ## Configuration
@@ -121,3 +129,10 @@ The current machine used to create this skeleton did not have Flutter/Dart insta
 flutter analyze
 flutter test
 ```
+
+Current verification:
+
+- `flutter analyze` passes.
+- `flutter test` passes.
+- `flutter build windows` passes.
+- Android release APK was built at `build/app/outputs/flutter-apk/app-release.apk`.
