@@ -11,7 +11,8 @@ class ManagerDashboardService {
 
   Future<ManagerDashboardSummary> loadSummary() async {
     final orders = await orderRepository.listOrders();
-    final paidOrders = orders.where((order) => order.status == OrderStatus.paid);
+    final paidOrders =
+        orders.where((order) => order.status == OrderStatus.paid);
     final unpaidDineIn = orders.where((order) => order.isUnpaidDineIn).length;
     final salesTotal = paidOrders.fold<double>(
       0,

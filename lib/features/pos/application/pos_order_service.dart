@@ -1,3 +1,5 @@
+// ignore_for_file: require_trailing_commas
+
 import '../../../shared/domain/money.dart';
 import '../../orders/application/order_pricing_service.dart';
 import '../../orders/domain/order.dart';
@@ -22,8 +24,20 @@ class PosOrderService {
     required double taxRate,
     required double serviceRate,
     double deliveryFee = 0,
+    DiscountType? discountType,
+    double discountValue = 0,
     DiningTable? table,
     PaymentMethod? paymentMethod,
+    double? cashPaid,
+    double? cardPaid,
+    double? cashReceived,
+    double? changeDue,
+    String? customerName,
+    String? customerPhone,
+    String? customerAddress,
+    String? cashierId,
+    String? cashierName,
+    String? shiftId,
     String? noteAr,
     DateTime? now,
   }) async {
@@ -38,7 +52,8 @@ class PosOrderService {
     }
 
     final createdAt = now ?? DateTime.now();
-    final lines = cart.map((line) => line.toOrderLine()).toList(growable: false);
+    final lines =
+        cart.map((line) => line.toOrderLine()).toList(growable: false);
     final totals = pricingService.calculate(
       OrderPricingInput(
         lines: lines,
@@ -46,6 +61,8 @@ class PosOrderService {
         taxRate: taxRate,
         serviceRate: serviceRate,
         deliveryFee: deliveryFee,
+        discountType: discountType,
+        discountValue: discountValue,
       ),
     );
     final orderNumber = await orderRepository.nextOrderNumber();
@@ -63,6 +80,22 @@ class PosOrderService {
       noteAr: noteAr?.trim().isEmpty ?? true ? null : noteAr!.trim(),
       paidAt: isDineIn ? null : createdAt,
       paymentMethod: isDineIn ? null : paymentMethod,
+      discountType: discountType,
+      discountValue: discountValue > 0 ? discountValue : null,
+      cashPaid: cashPaid,
+      cardPaid: cardPaid,
+      cashReceived: cashReceived,
+      changeDue: changeDue,
+      customerName:
+          customerName?.trim().isEmpty ?? true ? null : customerName!.trim(),
+      customerPhone:
+          customerPhone?.trim().isEmpty ?? true ? null : customerPhone!.trim(),
+      customerAddress: customerAddress?.trim().isEmpty ?? true
+          ? null
+          : customerAddress!.trim(),
+      cashierId: cashierId,
+      cashierName: cashierName,
+      shiftId: shiftId,
     );
 
     return orderRepository.save(order);
@@ -70,7 +103,8 @@ class PosOrderService {
 
   double cartSubtotal(List<CartLine> cart) {
     return Money.round(
-      cart.fold<double>(0, (sum, line) => sum + (line.unitPrice * line.quantity)),
+      cart.fold<double>(
+          0, (sum, line) => sum + (line.unitPrice * line.quantity)),
     );
   }
 }

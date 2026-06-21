@@ -34,7 +34,9 @@ class InMemoryOrderRepository implements OrderRepository {
   @override
   Future<List<Order>> listUnpaidDineInOrders() async {
     final orders = await listOrders();
-    return orders.where((order) => order.isUnpaidDineIn).toList(growable: false);
+    return orders
+        .where((order) => order.isUnpaidDineIn)
+        .toList(growable: false);
   }
 
   @override

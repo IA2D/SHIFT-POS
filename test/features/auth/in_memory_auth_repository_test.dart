@@ -1,32 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shift_pos/features/auth/data/in_memory_auth_repository.dart';
-import 'package:shift_pos/features/auth/domain/app_user.dart';
 
 void main() {
-  test('logs in with non-empty credentials and stores current user', () async {
+  test('sets, verifies, replaces, and clears cashier PIN', () async {
     final repository = InMemoryAuthRepository();
+    final admin = (await repository.listAccounts()).single;
 
-    final user = await repository.login(username: 'ahmed', password: '1234');
+    await repository.setPin(admin.id, '1234');
+    expect(await repository.verifyPin(admin.id, '1234'), isTrue);
+    expect(await repository.verifyPin(admin.id, '1111'), isFalse);
+    expect((await repository.listAccounts()).single.pin, isNotNull);
 
-    expect(user, isNotNull);
-    expect(user!.username, 'ahmed');
-    expect(user.can(Permission.accessPos), isTrue);
-    expect(await repository.currentUser(), user);
+    await repository.setPin(admin.id, '4321');
+    expect(await repository.verifyPin(admin.id, '1234'), isFalse);
+    expect(await repository.verifyPin(admin.id, '4321'), isTrue);
+
+    await repository.setPin(admin.id, null);
+    expect(await repository.verifyPin(admin.id, '4321'), isFalse);
+    expect((await repository.listAccounts()).single.pin, isNull);
   });
 
-  test('rejects empty credentials', () async {
+  test('rejects malformed PIN values', () async {
     final repository = InMemoryAuthRepository();
+    final admin = (await repository.listAccounts()).single;
 
-    expect(await repository.login(username: '', password: '1234'), isNull);
-    expect(await repository.login(username: 'ahmed', password: ''), isNull);
-  });
-
-  test('logout clears current user', () async {
-    final repository = InMemoryAuthRepository();
-    await repository.login(username: 'ahmed', password: '1234');
-
-    await repository.logout();
-
-    expect(await repository.currentUser(), isNull);
+    expect(() => repository.setPin(admin.id, '12'), throwsArgumentError);
+    expect(() => repository.setPin(admin.id, 'abcd'), throwsArgumentError);
   });
 }

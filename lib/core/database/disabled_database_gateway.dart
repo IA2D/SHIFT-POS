@@ -34,4 +34,14 @@ class DisabledDatabaseGateway implements DatabaseGateway {
   Future<void> delete(String table, String id) async {
     _disabled();
   }
+
+  @override
+  Future<String> createBackup({String? directoryPath}) async {
+    _disabled();
+  }
+
+  @override
+  Future<void> restoreBackup(String filePath) async {
+    _disabled();
+  }
 }

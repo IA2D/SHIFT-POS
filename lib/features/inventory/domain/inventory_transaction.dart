@@ -6,7 +6,11 @@ class InventoryTransaction {
     required this.unit,
     required this.type,
     required this.createdAt,
+    this.ingredientNameAr,
+    this.referenceType,
     this.referenceId,
+    this.shiftId,
+    this.supplierId,
     this.noteAr,
     this.createdBy,
   });
@@ -17,7 +21,11 @@ class InventoryTransaction {
   final String unit;
   final InventoryTransactionType type;
   final DateTime createdAt;
+  final String? ingredientNameAr;
+  final InventoryReferenceType? referenceType;
   final String? referenceId;
+  final String? shiftId;
+  final String? supplierId;
   final String? noteAr;
   final String? createdBy;
 }
@@ -28,4 +36,12 @@ enum InventoryTransactionType {
   saleReversal,
   waste,
   adjustment,
+}
+
+enum InventoryReferenceType {
+  order,
+  purchase,
+  manual,
+  shift,
+  supplier,
 }

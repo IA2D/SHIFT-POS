@@ -13,6 +13,10 @@ class OrderPaymentService {
     required String orderId,
     required PaymentMethod method,
     DateTime? paidAt,
+    double? cashPaid,
+    double? cardPaid,
+    double? cashReceived,
+    double? changeDue,
   }) async {
     final order = await orderRepository.getById(orderId);
     if (order == null) {
@@ -28,6 +32,10 @@ class OrderPaymentService {
     final paidOrder = order.markPaid(
       method: method,
       paidAt: paidAt ?? DateTime.now(),
+      cashPaid: cashPaid,
+      cardPaid: cardPaid,
+      cashReceived: cashReceived,
+      changeDue: changeDue,
     );
 
     return orderRepository.save(paidOrder);

@@ -8,7 +8,8 @@ import 'package:shift_pos/features/tables/domain/dining_table.dart';
 
 void main() {
   final cart = [
-    const CartLine(menuItemId: 'kofta', nameAr: 'كفتة', unitPrice: 100, quantity: 2),
+    const CartLine(
+        menuItemId: 'kofta', nameAr: 'كفتة', unitPrice: 100, quantity: 2),
   ];
 
   test('creates paid takeaway order', () async {
@@ -41,7 +42,8 @@ void main() {
       type: OrderType.dineIn,
       taxRate: 14,
       serviceRate: 0,
-      table: const DiningTable(id: 't1', nameAr: 'ترابيزة 1', sectionAr: 'الصالة'),
+      table:
+          const DiningTable(id: 't1', nameAr: 'ترابيزة 1', sectionAr: 'الصالة'),
       now: DateTime.utc(2026, 6, 20),
     );
 

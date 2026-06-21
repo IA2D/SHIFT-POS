@@ -12,10 +12,16 @@ class InMemorySettingsRepository implements SettingsRepository {
     ),
   }) : _settings = settings;
 
-  final PosSettings _settings;
+  PosSettings _settings;
 
   @override
   Future<PosSettings> getPosSettings() async {
     return _settings;
+  }
+
+  @override
+  Future<PosSettings> savePosSettings(PosSettings settings) async {
+    _settings = settings;
+    return settings;
   }
 }

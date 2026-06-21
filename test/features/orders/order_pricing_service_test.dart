@@ -7,7 +7,8 @@ import 'package:shift_pos/features/orders/domain/order_pricing.dart';
 void main() {
   const service = OrderPricingService();
 
-  test('calculates subtotal, tax, service, and delivery for delivery orders', () {
+  test('calculates subtotal, tax, service, and delivery for delivery orders',
+      () {
     final totals = service.calculate(
       const OrderPricingInput(
         orderType: OrderType.delivery,
@@ -15,8 +16,13 @@ void main() {
         serviceRate: 10,
         deliveryFee: 25,
         lines: [
-          OrderLine(menuItemId: 'pizza', nameAr: 'بيتزا', unitPrice: 100, quantity: 2),
-          OrderLine(menuItemId: 'cola', nameAr: 'كولا', unitPrice: 20, quantity: 1),
+          OrderLine(
+              menuItemId: 'pizza',
+              nameAr: 'بيتزا',
+              unitPrice: 100,
+              quantity: 2),
+          OrderLine(
+              menuItemId: 'cola', nameAr: 'كولا', unitPrice: 20, quantity: 1),
         ],
       ),
     );
@@ -37,7 +43,11 @@ void main() {
         discountType: DiscountType.percent,
         discountValue: 20,
         lines: [
-          OrderLine(menuItemId: 'grill', nameAr: 'مشويات', unitPrice: 200, quantity: 1),
+          OrderLine(
+              menuItemId: 'grill',
+              nameAr: 'مشويات',
+              unitPrice: 200,
+              quantity: 1),
         ],
       ),
     );
@@ -57,7 +67,8 @@ void main() {
         discountType: DiscountType.amount,
         discountValue: 500,
         lines: [
-          OrderLine(menuItemId: 'item', nameAr: 'صنف', unitPrice: 100, quantity: 1),
+          OrderLine(
+              menuItemId: 'item', nameAr: 'صنف', unitPrice: 100, quantity: 1),
         ],
       ),
     );

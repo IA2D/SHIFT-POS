@@ -4,7 +4,8 @@ import 'package:shift_pos/app/shift_pos_app.dart';
 import 'package:shift_pos/core/config/app_config.dart';
 
 void main() {
-  testWidgets('starts at login and opens POS after successful login', (tester) async {
+  testWidgets('starts at login and opens POS after successful login',
+      (tester) async {
     const config = AppConfig(
       environment: 'test',
       api: ApiConfig(

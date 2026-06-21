@@ -13,4 +13,8 @@ abstract interface class DatabaseGateway {
   );
 
   Future<void> delete(String table, String id);
+
+  Future<String> createBackup({String? directoryPath});
+
+  Future<void> restoreBackup(String filePath);
 }

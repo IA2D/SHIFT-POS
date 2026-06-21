@@ -16,6 +16,18 @@ class Order {
     this.noteAr,
     this.paidAt,
     this.paymentMethod,
+    this.discountType,
+    this.discountValue,
+    this.cashPaid,
+    this.cardPaid,
+    this.cashReceived,
+    this.changeDue,
+    this.customerName,
+    this.customerPhone,
+    this.customerAddress,
+    this.cashierId,
+    this.cashierName,
+    this.shiftId,
   });
 
   final String id;
@@ -30,6 +42,18 @@ class Order {
   final String? noteAr;
   final DateTime? paidAt;
   final PaymentMethod? paymentMethod;
+  final DiscountType? discountType;
+  final double? discountValue;
+  final double? cashPaid;
+  final double? cardPaid;
+  final double? cashReceived;
+  final double? changeDue;
+  final String? customerName;
+  final String? customerPhone;
+  final String? customerAddress;
+  final String? cashierId;
+  final String? cashierName;
+  final String? shiftId;
 
   bool get isUnpaidDineIn {
     return type == OrderType.dineIn && status == OrderStatus.unpaid;
@@ -38,6 +62,10 @@ class Order {
   Order markPaid({
     required PaymentMethod method,
     required DateTime paidAt,
+    double? cashPaid,
+    double? cardPaid,
+    double? cashReceived,
+    double? changeDue,
   }) {
     return Order(
       id: id,
@@ -52,6 +80,47 @@ class Order {
       noteAr: noteAr,
       paidAt: paidAt,
       paymentMethod: method,
+      discountType: discountType,
+      discountValue: discountValue,
+      cashPaid: cashPaid ?? this.cashPaid,
+      cardPaid: cardPaid ?? this.cardPaid,
+      cashReceived: cashReceived ?? this.cashReceived,
+      changeDue: changeDue ?? this.changeDue,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      customerAddress: customerAddress,
+      cashierId: cashierId,
+      cashierName: cashierName,
+      shiftId: shiftId,
+    );
+  }
+
+  Order cancel() {
+    return Order(
+      id: id,
+      orderNumber: orderNumber,
+      type: type,
+      lines: lines,
+      totals: totals,
+      status: OrderStatus.cancelled,
+      createdAt: createdAt,
+      tableId: tableId,
+      tableNameAr: tableNameAr,
+      noteAr: noteAr,
+      paidAt: paidAt,
+      paymentMethod: paymentMethod,
+      discountType: discountType,
+      discountValue: discountValue,
+      cashPaid: cashPaid,
+      cardPaid: cardPaid,
+      cashReceived: cashReceived,
+      changeDue: changeDue,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      customerAddress: customerAddress,
+      cashierId: cashierId,
+      cashierName: cashierName,
+      shiftId: shiftId,
     );
   }
 }
